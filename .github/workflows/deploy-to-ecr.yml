@@ -1,0 +1,50 @@
+name: Build and Push Docker Images to AWS ECR
+
+# main 브랜치에 코드가 push(또는 PR merge)될 때만 이 로봇이 작동합니다.
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest # GitHub가 빌려주는 최신 리눅스 컴퓨터에서 실행됩니다.
+
+    steps:
+    # 1. GitHub 레포지토리의 최신 코드를 내려받습니다.
+    - name: Checkout Source Code
+      uses: actions/checkout@v3
+
+    # 2. GitHub Secrets에 저장해둔 출입증으로 AWS에 로그인합니다.
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }}
+
+    # 3. AWS ECR 창고에 로그인을 요청합니다.
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
+
+    # 4. 백엔드 도커 이미지를 빌드하고 ECR로 Push 합니다.
+    - name: Build, tag, and push Backend Image
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY: chatbot-backend # 우리가 AWS에서 만든 백엔드 창고 이름
+        IMAGE_TAG: latest
+      run: |
+        cd backend
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+    # 5. 프론트엔드 도커 이미지를 빌드하고 ECR로 Push 합니다.
+    - name: Build, tag, and push Frontend Image
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY: chatbot-frontend # 우리가 AWS에서 만든 프론트엔드 창고 이름
+        IMAGE_TAG: latest
+      run: |
+        cd frontend
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
