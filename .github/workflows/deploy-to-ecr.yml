@@ -52,5 +52,5 @@ jobs:
     # 6. ECS 클러스터에 새 버전 배포 명령 내리기 (CD 완전 자동화)
     - name: Deploy to ECS (Force new deployment)
       run: |
-        aws ecs update-service --cluster chatbot-cluster --service backend-service --force-new-deployment
+        aws ecs update-service --cluster chatbot-cluster --service chatbot-backend-task-service-50m3yzmq --force-new-deployment
         aws ecs update-service --cluster chatbot-cluster --service frontend-service --force-new-deployment
