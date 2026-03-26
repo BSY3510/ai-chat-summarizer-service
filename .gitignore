@@ -1,0 +1,17 @@
+# Mac/Windows system files
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# Backend (Spring Boot)
+/backend/build/
+/backend/out/
+/backend/.gradle/
+
+# Frontend (React)
+/frontend/node_modules/
+/frontend/dist/
