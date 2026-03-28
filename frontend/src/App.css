@@ -169,3 +169,35 @@
 .send-btn:hover {
   color: #0c8265;
 }
+
+.message-bubble p {
+  margin: 0 0 10px 0;
+}
+.message-bubble p:last-child {
+  margin: 0;
+}
+.message-bubble pre {
+  background-color: #2d2d2d;
+  color: #ccc;
+  padding: 12px;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-family: 'Courier New', Courier, monospace;
+}
+.message-bubble code {
+  background-color: rgba(0, 0, 0, 0.05);
+  padding: 2px 4px;
+  border-radius: 4px;
+  font-family: 'Courier New', Courier, monospace;
+}
+.message-bubble pre code {
+  background-color: transparent;
+  padding: 0;
+}
+.message-bubble ul, .message-bubble ol {
+  margin: 0 0 10px 20px;
+  padding: 0;
+}
+.user .message-bubble code {
+  background-color: rgba(255, 255, 255, 0.2);
+}
