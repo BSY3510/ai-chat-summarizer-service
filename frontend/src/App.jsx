@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown'
 import './App.css';
 
 function App() {
@@ -113,7 +114,7 @@ function App() {
           {chatLog.map((chat) => (
             <div key={chat.id} className={`message-wrapper ${chat.sender}`}>
               <div className="message-bubble">
-                {chat.message}
+                <ReactMarkdown>{chat.message}</ReactMarkdown>
               </div>
             </div>
           ))}
