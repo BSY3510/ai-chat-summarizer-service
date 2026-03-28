@@ -1,5 +1,6 @@
 package com.bsy.aisummarizer;
 
+import java.util.List;
 import org.springframework.web.bind.annotation.*;
 import lombok.RequiredArgsConstructor;
 
@@ -22,5 +23,10 @@ public class ChatController {
         chatRepository.save(chatMessage);
 
         return aiReply;
+    }
+
+    @GetMapping("/history")
+    public List<ChatMessage> getChatHistory() {
+        return chatRepository.findAll();
     }
 }
