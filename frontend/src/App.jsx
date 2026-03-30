@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import ReactMarkdown from 'react-markdown'
+import ReactMarkdown from 'react-markdown';
 import './App.css';
 
 function App() {
@@ -8,7 +8,6 @@ function App() {
   const [history, setHistory] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  // 1. 화면이 처음 렌더링될 때 백엔드에서 과거 대화 기록(히스토리) 가져오기
   useEffect(() => {
     fetchHistory();
   }, []);
@@ -18,15 +17,18 @@ function App() {
       const res = await fetch('http://localhost:8080/api/history');
       if (res.ok) {
         const data = await res.json();
-        const formattedHistory = data.map(item => ({
-          id: item.id,
-          title: item.userMessage
-        }));
-        setHistory(formattedHistory);
+        setHistory(data);
       }
     } catch (error) {
       console.error("대화 기록을 불러오지 못했습니다.", error);
     }
+  };
+
+  const handleHistoryClick = (item) => {
+    setChatLog([
+      { id: `${item.id}-user`, sender: 'user', message: item.userMessage },
+      { id: `${item.id}-ai`, sender: 'ai', message: item.aiResponse }
+    ]);
   };
 
   const handleSend = async () => {
@@ -43,7 +45,6 @@ function App() {
     setChatLog((prev) => [...prev, loadingMsg]);
 
     try {
-      // 2. 백엔드 API 호출 (질문 전송)
       const res = await fetch('http://localhost:8080/api/chat', {
         method: 'POST',
         headers: {
@@ -62,18 +63,16 @@ function App() {
             message: aiReply
           })
         );
-        
         fetchHistory();
       } else {
         throw new Error("서버 통신 오류");
       }
     } catch (error) {
-      console.error("메시지 전송 실패:", error);
       setChatLog((prev) => 
         prev.filter(msg => msg.id !== 'loading').concat({
           id: Date.now() + 1,
           sender: 'ai',
-          message: '서버와 연결할 수 없습니다. 백엔드 서버가 켜져 있는지 확인해주세요.'
+          message: '서버와 연결할 수 없습니다.'
         })
       );
     } finally {
@@ -83,21 +82,24 @@ function App() {
 
   return (
     <div className="app-container">
-      {/* 1. 좌측 사이드바 */}
       <aside className="sidebar">
         <div className="sidebar-header">
+          {/* 새 대화 버튼 클릭 시 채팅창 초기화 */}
           <button className="new-chat-btn" onClick={() => setChatLog([])}>+ 새 대화</button>
         </div>
         <ul className="history-list">
           {history.map((item) => (
-            <li key={item.id} className="history-item">
-              💬 {item.title}
+            <li 
+              key={item.id} 
+              className="history-item"
+              onClick={() => handleHistoryClick(item)}
+            >
+              💬 {item.userMessage}
             </li>
           ))}
         </ul>
       </aside>
 
-      {/* 2. 우측 메인 채팅 영역 */}
       <main className="chat-main">
         <header className="chat-header">
           <h1>AI Chat & Summarizer</h1>
@@ -107,7 +109,9 @@ function App() {
           {chatLog.length === 0 && (
             <div className="message-wrapper ai">
               <div className="message-bubble">
-                안녕하세요! 무엇을 도와드릴까요? 긴 글을 주시면 요약해 드립니다.
+                <ReactMarkdown>
+                  안녕하세요! 백엔드 아키텍처 및 코드 리뷰, 혹은 텍스트 요약을 도와드립니다.
+                </ReactMarkdown>
               </div>
             </div>
           )}

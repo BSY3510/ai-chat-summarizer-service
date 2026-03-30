@@ -112,15 +112,17 @@
   max-width: 70%;
   padding: 12px 16px;
   border-radius: 12px;
-  line-height: 1.5;
+  line-height: 1.6;
   font-size: 15px;
   word-wrap: break-word;
+  text-align: left;
 }
 
 .user .message-bubble {
   background-color: #10a37f;
   color: white;
   border-bottom-right-radius: 2px;
+  white-space: pre-wrap;
 }
 
 .ai .message-bubble {
@@ -185,13 +187,16 @@
   font-family: 'Courier New', Courier, monospace;
 }
 .message-bubble code {
-  background-color: rgba(0, 0, 0, 0.05);
+  background-color: #e9ecef;
+  color: #d63384;
   padding: 2px 4px;
   border-radius: 4px;
   font-family: 'Courier New', Courier, monospace;
+  font-weight: 500;
 }
 .message-bubble pre code {
   background-color: transparent;
+  color: inherit;
   padding: 0;
 }
 .message-bubble ul, .message-bubble ol {
@@ -199,5 +204,6 @@
   padding: 0;
 }
 .user .message-bubble code {
-  background-color: rgba(255, 255, 255, 0.2);
+  background-color: rgba(0, 0, 0, 0.2);
+  color: #fff; 
 }
