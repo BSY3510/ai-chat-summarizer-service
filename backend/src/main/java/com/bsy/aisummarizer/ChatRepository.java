@@ -9,6 +9,8 @@ public interface ChatRepository extends JpaRepository<ChatMessage, Long> {
 
     List<ChatMessage> findByDeviceId(String deviceId);
 
+    List<ChatMessage> findBySessionIdOrderByCreatedAtAsc(Long sessionId);
+
     @Query("SELECT c FROM ChatMessage c WHERE c.deviceId = :deviceId AND " +
         "(LOWER(c.userMessage) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
         "LOWER(c.aiResponse) LIKE LOWER(CONCAT('%', :keyword, '%')))")
