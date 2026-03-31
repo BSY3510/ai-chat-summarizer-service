@@ -29,4 +29,12 @@ public class ChatController {
     public List<ChatMessage> getChatHistory() {
         return chatRepository.findAll();
     }
+
+    @GetMapping("/history/search")
+    public List<ChatMessage> searchChatHistory(@RequestParam String keyword) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return chatRepository.findAll();
+        }
+        return chatRepository.findByUserMessageContainingIgnoreCaseOrAiResponseContainingIgnoreCase(keyword, keyword);
+    }
 }
