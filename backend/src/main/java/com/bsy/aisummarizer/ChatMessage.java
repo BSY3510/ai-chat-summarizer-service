@@ -14,6 +14,10 @@ public class ChatMessage {
 
     private String deviceId;
 
+    @ManyToOne
+    @JoinColumn(name = "session_id")
+    private ChatSession session;
+
     @Column(columnDefinition = "TEXT")
     private String userMessage;
 

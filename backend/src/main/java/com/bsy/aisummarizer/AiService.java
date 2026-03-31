@@ -2,6 +2,7 @@ package com.bsy.aisummarizer;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.ArrayList;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -37,7 +38,7 @@ public class AiService {
         }
     }
 
-    public String generateSummary(String userMessage) {
+    public String generateSummary(ChatRequest request) {
         String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + apiKey;
 
         HttpHeaders headers = new HttpHeaders();
@@ -46,21 +47,35 @@ public class AiService {
         SystemPrompt activePrompt = promptRepository.findByIsActiveTrue()
             .orElseThrow(() -> new RuntimeException("활성화된 시스템 프롬프트가 없습니다."));
 
-        String fullPrompt = activePrompt.getPromptContent() + "\n\n사용자 입력: " + userMessage;
+        Map<String, Object> systemInstruction = Map.of(
+            "parts", List.of(Map.of("text", activePrompt.getPromptContent()))
+        );
 
-        Map<String, Object> part = new HashMap<>();
-        part.put("text", fullPrompt);
+        List<Map<String, Object>> contents = new ArrayList<>();
 
-        Map<String, Object> content = new HashMap<>();
-        content.put("parts", List.of(part));
+        if (request.getHistory() != null && !request.getHistory().isEmpty()) {
+            for (ChatRequest.MessageLog log : request.getHistory()) {
+                String role = log.getSender().equals("user") ? "user" : "model";
+                contents.add(Map.of(
+                    "role", role,
+                    "parts", List.of(Map.of("text", log.getMessage()))
+                ));
+            }
+        }
+
+        contents.add(Map.of(
+            "role", "user",
+            "parts", List.of(Map.of("text", request.getMessage()))
+        ));
 
         Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("contents", List.of(content));
+        requestBody.put("systemInstruction", systemInstruction);
+        requestBody.put("contents", contents);
 
-        HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
+        HttpEntity<Map<String, Object>> httpEntity = new HttpEntity<>(requestBody, headers);
 
         try {
-            String response = restTemplate.postForObject(url, request, String.class);
+            String response = restTemplate.postForObject(url, httpEntity, String.class);
             JsonNode rootNode = objectMapper.readTree(response);
             return rootNode.path("candidates")
                 .get(0)
