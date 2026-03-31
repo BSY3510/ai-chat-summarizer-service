@@ -7,6 +7,7 @@ function App() {
   const [chatLog, setChatLog] = useState([]);
   const [history, setHistory] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [searchKeyword, setSearchKeyword] = useState('');
 
   useEffect(() => {
     fetchHistory();
@@ -14,13 +15,29 @@ function App() {
 
   const fetchHistory = async () => {
     try {
-      const res = await fetch('http://localhost:8080/api/history');
+      const res = await fetch('/api/history');
       if (res.ok) {
         const data = await res.json();
         setHistory(data);
       }
     } catch (error) {
       console.error("대화 기록을 불러오지 못했습니다.", error);
+    }
+  };
+
+  const searchHistory = async () => {
+    try {
+      const url = searchKeyword.trim()
+        ? `/api/history/search?keyword=${encodeURIComponent(searchKeyword)}`
+        : '/api/history';
+        
+      const res = await fetch(url);
+      if (res.ok) {
+        const data = await res.json();
+        setHistory(data);
+      }
+    } catch (error) {
+      console.error("검색 중 오류 발생:", error);
     }
   };
 
@@ -45,7 +62,7 @@ function App() {
     setChatLog((prev) => [...prev, loadingMsg]);
 
     try {
-      const res = await fetch('http://localhost:8080/api/chat', {
+      const res = await fetch('/api/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'text/plain',
@@ -63,6 +80,7 @@ function App() {
             message: aiReply
           })
         );
+        setSearchKeyword('');
         fetchHistory();
       } else {
         throw new Error("서버 통신 오류");
@@ -84,19 +102,33 @@ function App() {
     <div className="app-container">
       <aside className="sidebar">
         <div className="sidebar-header">
-          {/* 새 대화 버튼 클릭 시 채팅창 초기화 */}
           <button className="new-chat-btn" onClick={() => setChatLog([])}>+ 새 대화</button>
         </div>
+        
+        <div className="sidebar-search">
+          <input 
+            type="text" 
+            placeholder="과거 대화 검색..." 
+            value={searchKeyword}
+            onChange={(e) => setSearchKeyword(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && searchHistory()}
+          />
+        </div>
+
         <ul className="history-list">
-          {history.map((item) => (
-            <li 
-              key={item.id} 
-              className="history-item"
-              onClick={() => handleHistoryClick(item)}
-            >
-              💬 {item.userMessage}
-            </li>
-          ))}
+          {history.length === 0 ? (
+             <li className="history-item" style={{ textAlign: 'center', color: '#888' }}>결과가 없습니다.</li>
+          ) : (
+            history.map((item) => (
+              <li 
+                key={item.id} 
+                className="history-item"
+                onClick={() => handleHistoryClick(item)}
+              >
+                💬 {item.userMessage}
+              </li>
+            ))
+          )}
         </ul>
       </aside>
 
