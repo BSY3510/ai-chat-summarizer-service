@@ -12,6 +12,8 @@ public class ChatMessage {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private String deviceId;
+
     @Column(columnDefinition = "TEXT")
     private String userMessage;
 
