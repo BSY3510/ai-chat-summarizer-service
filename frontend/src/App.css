@@ -44,6 +44,31 @@
   background-color: #2a2b32;
 }
 
+.sidebar-search {
+  margin-bottom: 20px;
+}
+
+.sidebar-search input {
+  width: 100%;
+  padding: 10px 12px;
+  background-color: #343541;
+  border: 1px solid #4d4d4f;
+  border-radius: 6px;
+  color: #fff;
+  font-size: 14px;
+  box-sizing: border-box;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.sidebar-search input::placeholder {
+  color: #8e8ea0;
+}
+
+.sidebar-search input:focus {
+  border-color: #10a37f;
+}
+
 .history-list {
   list-style-type: none;
   padding: 0;
