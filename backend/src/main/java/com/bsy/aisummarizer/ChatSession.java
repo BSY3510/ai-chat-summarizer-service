@@ -1,6 +1,9 @@
 package com.bsy.aisummarizer;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 import java.time.LocalDateTime;
@@ -15,4 +18,8 @@ public class ChatSession {
     private String title;
     private String deviceId;
     private LocalDateTime createdAt = LocalDateTime.now();
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "session", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ChatMessage> messages = new ArrayList<>();
 }

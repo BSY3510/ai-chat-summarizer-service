@@ -41,6 +41,30 @@ function App() {
     }
   };
 
+  const deleteSession = async (sessionId, e) => {
+    e.stopPropagation();
+    
+    if (!window.confirm("정말 이 대화방을 삭제하시겠습니까? (관련 메시지도 모두 삭제됩니다)")) {
+      return;
+    }
+
+    try {
+      await fetch(`/api/sessions/${sessionId}`, {
+        method: 'DELETE',
+        headers: { 'X-Device-Id': DEVICE_ID }
+      });
+
+      if (currentSessionId === sessionId) {
+        setCurrentSessionId(null);
+        setChatLog([]);
+      }
+
+      fetchSessions(); 
+    } catch (error) {
+      console.error("대화방 삭제 실패:", error);
+    }
+  };
+
   const handleSessionClick = async (sessionId) => {
     setCurrentSessionId(sessionId);
     try {
@@ -186,21 +210,29 @@ function App() {
                     onBlur={() => updateTitle(s.id)} 
                     onKeyDown={(e) => e.key === 'Enter' && updateTitle(s.id)} 
                     autoFocus 
-                    onClick={(e) => e.stopPropagation()}
+                    onClick={(e) => e.stopPropagation()} 
                   />
                 ) : (
                   <div className="session-title-container">
                     <span className="session-title-text">💬 {s.title}</span>
-                    <button 
-                      className="edit-btn" 
-                      onClick={(e) => { 
-                        e.stopPropagation(); 
-                        setEditingSessionId(s.id); 
-                        setEditTitle(s.title); 
-                      }}
-                    >
-                      ✏️
-                    </button>
+                    <div className="session-actions">
+                      <button 
+                        className="icon-btn" 
+                        onClick={(e) => { 
+                          e.stopPropagation(); 
+                          setEditingSessionId(s.id); 
+                          setEditTitle(s.title); 
+                        }}
+                      >
+                        ✏️
+                      </button>
+                      <button 
+                        className="icon-btn delete-btn" 
+                        onClick={(e) => deleteSession(s.id, e)}
+                      >
+                        🗑️
+                      </button>
+                    </div>
                   </div>
                 )}
               </li>
@@ -219,7 +251,7 @@ function App() {
             <div className="message-wrapper ai">
               <div className="message-bubble">
                 <ReactMarkdown>
-                  안녕하세요! 백엔드 아키텍처 및 코드 리뷰, 혹은 텍스트 요약을 도와드립니다.
+                  안녕하세요! 작성해주신 내용에 대해 요약 또는 설명을 도와드립니다.
                 </ReactMarkdown>
               </div>
             </div>
