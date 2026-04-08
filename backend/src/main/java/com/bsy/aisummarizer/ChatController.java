@@ -66,4 +66,9 @@ public class ChatController {
         }
         return chatRepository.searchByDeviceIdAndKeyword(deviceId, keyword);
     }
+
+    @DeleteMapping("/sessions/{sessionId}")
+    public void deleteSession(@PathVariable Long sessionId) {
+        sessionRepository.deleteById(sessionId);
+    }
 }

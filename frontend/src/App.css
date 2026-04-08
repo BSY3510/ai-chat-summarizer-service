@@ -104,17 +104,28 @@
   margin-right: 10px;
 }
 
-.edit-btn {
+.session-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.icon-btn {
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 13px;
   opacity: 0.5;
-  transition: opacity 0.2s;
+  transition: opacity 0.2s, transform 0.1s;
+  padding: 2px 4px;
 }
 
-.edit-btn:hover {
+.icon-btn:hover {
   opacity: 1;
+  transform: scale(1.1);
+}
+
+.delete-btn:hover {
+  filter: drop-shadow(0 0 2px rgba(255, 77, 79, 0.8));
 }
 
 .edit-title-input {
