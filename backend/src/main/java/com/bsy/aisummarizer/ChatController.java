@@ -3,6 +3,7 @@ package com.bsy.aisummarizer;
 import org.springframework.web.bind.annotation.*;
 import lombok.RequiredArgsConstructor;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api")
@@ -15,7 +16,7 @@ public class ChatController {
     private final AiService aiService;
 
     @PostMapping("/chat")
-    public ChatMessage handleChat(@RequestBody ChatRequest request, @RequestHeader("X-Device-Id") String deviceId) {
+    public ChatMessageResponse handleChat(@RequestBody ChatRequest request, @RequestHeader(value = "X-Device-Id", defaultValue = "unknown") String deviceId) {
         ChatSession session;
 
         if (request.getSessionId() == null) {
@@ -34,37 +35,35 @@ public class ChatController {
         chatMessage.setAiResponse(aiReply);
         chatMessage.setDeviceId(deviceId);
         chatMessage.setSession(session);
-        return chatRepository.save(chatMessage);
+
+        ChatMessage savedMessage = chatRepository.save(chatMessage);
+
+        return ChatMessageResponse.from(savedMessage);
     }
 
     @GetMapping("/sessions")
-    public List<ChatSession> getSessions(@RequestHeader("X-Device-Id") String deviceId) {
-        return sessionRepository.findByDeviceIdOrderByCreatedAtDesc(deviceId);
+    public List<ChatSessionResponse> getSessions(@RequestHeader(value = "X-Device-Id", defaultValue = "unknown") String deviceId) {
+        return sessionRepository.findByDeviceIdOrderByCreatedAtDesc(deviceId)
+            .stream()
+            .map(ChatSessionResponse::from)
+            .collect(Collectors.toList());
     }
 
     @GetMapping("/sessions/{sessionId}/messages")
-    public List<ChatMessage> getSessionMessages(@PathVariable Long sessionId) {
-        return chatRepository.findBySessionIdOrderByCreatedAtAsc(sessionId);
+    public List<ChatMessageResponse> getSessionMessages(@PathVariable Long sessionId) {
+        return chatRepository.findBySessionIdOrderByCreatedAtAsc(sessionId)
+            .stream()
+            .map(ChatMessageResponse::from)
+            .collect(Collectors.toList());
     }
 
     @PatchMapping("/sessions/{sessionId}")
-    public ChatSession updateSessionTitle(@PathVariable Long sessionId, @RequestBody String newTitle) {
+    public ChatSessionResponse updateSessionTitle(@PathVariable Long sessionId, @RequestBody String newTitle) {
         ChatSession session = sessionRepository.findById(sessionId).orElseThrow();
         session.setTitle(newTitle);
-        return sessionRepository.save(session);
-    }
+        ChatSession updatedSession = sessionRepository.save(session);
 
-    @GetMapping("/history")
-    public List<ChatMessage> getChatHistory(@RequestHeader(value = "X-Device-Id", defaultValue = "unknown") String deviceId) {
-        return chatRepository.findByDeviceId(deviceId);
-    }
-
-    @GetMapping("/history/search")
-    public List<ChatMessage> searchChatHistory(@RequestParam String keyword, @RequestHeader(value = "X-Device-Id", defaultValue = "unknown") String deviceId) {
-        if (keyword == null || keyword.trim().isEmpty()) {
-            return chatRepository.findByDeviceId(deviceId);
-        }
-        return chatRepository.searchByDeviceIdAndKeyword(deviceId, keyword);
+        return ChatSessionResponse.from(updatedSession);
     }
 
     @DeleteMapping("/sessions/{sessionId}")
